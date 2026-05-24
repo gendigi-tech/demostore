@@ -1247,6 +1247,26 @@ function catEmoji(cat) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// EXPOSE TO WINDOW (required for HTML onclick= handlers)
+// ═══════════════════════════════════════════════════════════════
+
+Object.assign(window, {
+  // auth
+  doLogin, doLogout,
+  // navigation & render
+  navigate, render,
+  // products
+  openAddModal, openEditModal, saveProduct, calcDiscount,
+  toggleActive, confirmDelete, deleteProduct,
+  // settings
+  switchSettingsTab, saveSettingsForm,
+  // export/import
+  exportJSON, importJSON, copyEmbedCode, resetToDefaults,
+  // ui
+  toggleTheme, handleBackdropClick, closeModal,
+});
+
+// ═══════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════
 

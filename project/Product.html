@@ -13,76 +13,966 @@
     />
 
     <style>
-      html {
-        scroll-behavior: smooth;
-      }
-      html,
-      body {
-        margin: 0;
-        padding: 0;
+      html { scroll-behavior: smooth; }
+      html, body {
+        margin: 0; padding: 0;
         background: #fafaf7;
-        font-family: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
+        font-family: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         color: #0e1226;
         -webkit-font-smoothing: antialiased;
       }
-      * {
-        box-sizing: border-box;
-      }
-      ::selection {
-        background: #2a5bff;
-        color: #fff;
-      }
+      * { box-sizing: border-box; }
+      ::selection { background: #2a5bff; color: #fff; }
     </style>
 
-    <script
-      src="https://unpkg.com/react@18.3.1/umd/react.development.js"
-      integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"
-      integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"
-      integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y"
-      crossorigin="anonymous"
-    ></script>
+    <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+    <!-- CMS: load localStorage data before React renders -->
+    <script>
+      window.__CMS = (function() {
+        try {
+          var p = localStorage.getItem('cms_products');
+          var s = localStorage.getItem('cms_settings');
+          return { product: p ? JSON.parse(p)[0] : null, settings: s ? JSON.parse(s) : null };
+        } catch(e) { return { product: null, settings: null }; }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
 
-    <script type="text/babel" src="hero-shared.jsx"></script>
-    <script type="text/babel" src="landing-misc.jsx"></script>
-    <script type="text/babel" src="product-hero.jsx"></script>
-    <script type="text/babel" src="product-hooks.jsx"></script>
-    <script type="text/babel" src="product-inside.jsx"></script>
-    <script type="text/babel" src="product-pricing.jsx"></script>
-
     <script type="text/babel" data-presets="react">
-      function App() {
-        return (
-          <div>
-            <StickyBuyBar />
-            <LandingHeader />
-            <ProductHero />
-            <ProductHooks />
-            <ProductCTAInterrupt />
-            <ProductInside />
-            <ProductDemoGallery />
-            <ProductTestimonials />
-            <ProductComparison />
-            <ProductPricing />
-            <ProductFAQ />
-            <ProductFinalCTA />
-            <LandingFooter />
-          </div>
-        );
-      }
+// ─── CMS DATA (from admin panel localStorage, falls back to hardcoded defaults)
+const _CMS = window.__CMS || {};
+const _P   = _CMS.product  || {};
+const _S   = (_CMS.settings || {});
+const _H   = _S.hero        || {};
+const _SP  = _S.socialProof || {};
 
-      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+const CMS_PRODUCT_NAME  = _P.name          || 'Master Budget Tracker Pro';
+const CMS_PRICE_SALE    = _P.price         ? _P.price.toLocaleString('vi-VN') + '₫'         : '299.000₫';
+const CMS_PRICE_ORIG    = _P.originalPrice ? _P.originalPrice.toLocaleString('vi-VN') + '₫' : '599.000₫';
+const CMS_DISCOUNT      = _P.discount      || 50;
+const CMS_CTA           = _H.ctaText       || 'Sở hữu hệ thống ngay';
+const CMS_RATING        = _SP.rating       || '4.9';
+const CMS_CUSTOMERS     = _SP.customerCount|| '1.247';
+const CMS_REVIEWS       = _SP.reviewCount  || '312';
+const CMS_BADGE         = _H.badge         || '💸 Tài chính · Hot · Bestseller';
+
+// ─── SHARED PRIMITIVES ───────────────────────────────────────────────────────
+
+function HandUnderline({ color = "#1f4dd8", strokeWidth = 5 }) {
+  return (
+    <svg viewBox="0 0 260 22" preserveAspectRatio="none" style={{ position:"absolute", left:"-4%", right:"-4%", bottom:-10, width:"108%", height:22, pointerEvents:"none", overflow:"visible" }}>
+      <path d="M3 13 C 40 6, 80 18, 130 11 S 220 6, 257 12" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" opacity="0.85"/>
+    </svg>
+  );
+}
+
+function StickyNote({ children, bg="#fff2a8", rotate=-4, shadow="0 12px 28px rgba(40,30,0,0.18), 0 2px 4px rgba(40,30,0,0.08)", width=200, height=220, pin=true, pinColor="#e23b3b", style={} }) {
+  return (
+    <div style={{ position:"relative", width, height, background:bg, transform:`rotate(${rotate}deg)`, boxShadow:shadow, padding:"22px 18px 18px", borderRadius:2, clipPath:"polygon(0% 1%, 99% 0%, 100% 99%, 1% 100%)", fontFamily:"'Caveat', 'Patrick Hand', cursive", ...style }}>
+      {pin && <div style={{ position:"absolute", top:-6, left:"50%", transform:"translateX(-50%)", width:12, height:12, borderRadius:"50%", background:pinColor, boxShadow:"inset -2px -2px 3px rgba(0,0,0,0.25), 0 2px 3px rgba(0,0,0,0.25)" }}/>}
+      {children}
+    </div>
+  );
+}
+
+// ─── HEADER ──────────────────────────────────────────────────────────────────
+
+function LandingHeader() {
+  const accent = "#2A5BFF", ink = "#0E1226", muted = "rgba(14,18,38,0.65)";
+  const [scrolled, setScrolled] = React.useState(false);
+  React.useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", fn);
+    return () => window.removeEventListener("scroll", fn);
+  }, []);
+  const items = [
+    { l:"Tài chính", h:"#finance" }, { l:"Sức khỏe", h:"#health" },
+    { l:"Mối quan hệ", h:"#relations" }, { l:"Vì sao Bestlist", h:"#why" }, { l:"Bảng giá", h:"#pricing" }
+  ];
+  return (
+    <header style={{ position:"sticky", top:0, zIndex:100, background: scrolled ? "rgba(250,250,247,0.85)" : "transparent", backdropFilter: scrolled ? "blur(12px)" : "none", WebkitBackdropFilter: scrolled ? "blur(12px)" : "none", borderBottom: scrolled ? "1px solid rgba(14,18,38,0.06)" : "1px solid transparent", transition:"all .25s ease" }}>
+      <div style={{ maxWidth:1280, margin:"0 auto", padding:"18px 32px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+        <a href="#" style={{ display:"flex", alignItems:"center", gap:10, color:ink, fontWeight:700, letterSpacing:"-0.02em", fontSize:17, textDecoration:"none" }}>
+          <div style={{ width:32, height:32, background:accent, borderRadius:9, display:"flex", alignItems:"center", justifyContent:"center" }}>
+            <svg width="18" height="18" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2" fill="#fff"/><path d="M8 8 H 16 M 8 11 H 16 M 8 14 H 16 M 8 17 H 13" stroke={accent} strokeWidth="1.8" strokeLinecap="round"/></svg>
+          </div>
+          store.bestlist.ai
+        </a>
+        <nav style={{ display:"flex", gap:32 }}>
+          {items.map(x => (
+            <a key={x.l} href={x.h} style={{ color:muted, fontSize:14, fontWeight:500, textDecoration:"none", transition:"color .15s" }} onMouseEnter={e=>e.currentTarget.style.color=ink} onMouseLeave={e=>e.currentTarget.style.color=muted}>{x.l}</a>
+          ))}
+        </nav>
+        <div style={{ display:"flex", alignItems:"center", gap:18, fontSize:14, fontWeight:500 }}>
+          <a href="#" style={{ color:muted, textDecoration:"none", transition:"color .15s" }} onMouseEnter={e=>e.currentTarget.style.color=ink} onMouseLeave={e=>e.currentTarget.style.color=muted}>Đăng nhập</a>
+          <a href="#pricing" style={{ background:ink, color:"#fff", padding:"9px 18px", borderRadius:999, textDecoration:"none", fontWeight:600, letterSpacing:"-0.01em", transition:"transform .15s, box-shadow .15s", display:"inline-flex", alignItems:"center", gap:6 }} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow="0 10px 22px rgba(0,0,0,0.16)"}} onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="none"}}>Mua ngay →</a>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+// ─── STICKY BUY BAR ──────────────────────────────────────────────────────────
+
+function StickyBuyBar() {
+  const accent = "#2A5BFF", ink = "#0E1226";
+  const [show, setShow] = React.useState(false);
+  React.useEffect(() => {
+    const fn = () => setShow(window.scrollY > 700);
+    window.addEventListener("scroll", fn);
+    return () => window.removeEventListener("scroll", fn);
+  }, []);
+  return (
+    <div style={{ position:"fixed", top:0, left:0, right:0, zIndex:200, transform: show ? "translateY(0)" : "translateY(-100%)", transition:"transform .25s ease", background:"rgba(14,18,38,0.96)", backdropFilter:"blur(12px)", borderBottom:"1px solid rgba(255,255,255,0.08)", padding:"10px 28px", color:"#fff" }}>
+      <div style={{ maxWidth:1280, margin:"0 auto", display:"flex", alignItems:"center", justifyContent:"space-between", gap:20 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+          <div style={{ width:38, height:38, borderRadius:8, background:`linear-gradient(140deg, ${accent}, #1B43D9)`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:18 }}>💸</div>
+          <div>
+            <div style={{ fontSize:13, fontWeight:600 }}>{CMS_PRODUCT_NAME}</div>
+            <div style={{ fontSize:11, color:"rgba(255,255,255,0.6)" }}>⭐ {CMS_RATING} · {CMS_CUSTOMERS} lượt mua · Mua 1 lần dùng trọn đời</div>
+          </div>
+        </div>
+        <div style={{ display:"flex", alignItems:"center", gap:18 }}>
+          <div style={{ display:"flex", alignItems:"baseline", gap:8 }}>
+            <span style={{ fontSize:11, color:"rgba(255,255,255,0.5)", textDecoration:"line-through" }}>{CMS_PRICE_ORIG}</span>
+            <span style={{ fontSize:18, fontWeight:700 }}>{CMS_PRICE_SALE}</span>
+          </div>
+          <a href="#pricing" style={{ background:accent, color:"#fff", padding:"11px 22px", borderRadius:999, textDecoration:"none", fontWeight:700, fontSize:13.5, display:"inline-flex", alignItems:"center", gap:6, boxShadow:"0 8px 20px rgba(42,91,255,0.40)" }}>
+            Mua ngay
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12 H 19 M 13 6 L 19 12 L 13 18" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── PRODUCT HERO ─────────────────────────────────────────────────────────────
+
+function ProductHero() {
+  const accent = "#2A5BFF", ink = "#0E1226", muted = "rgba(14,18,38,0.55)";
+  return (
+    <section style={{ position:"relative", padding:"20px 28px 60px" }}>
+      <div style={{ maxWidth:1280, margin:"0 auto", display:"grid", gridTemplateColumns:"1fr 1.05fr", gap:60, alignItems:"center", minHeight:640 }}>
+        {/* LEFT */}
+        <div>
+          <div style={{ display:"flex", alignItems:"center", gap:6, fontSize:12.5, color:muted, marginBottom:22 }}>
+            <a href="#" style={{ color:muted, textDecoration:"none" }}>Sheets</a>
+            <span>·</span>
+            <a href="#" style={{ color:muted, textDecoration:"none" }}>Tài chính</a>
+            <span>·</span>
+            <span style={{ color:ink, fontWeight:600 }}>Master Budget Tracker Pro</span>
+          </div>
+          <div style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"5px 12px", background:"#FFE2CB", border:"1px solid rgba(249,115,22,0.25)", borderRadius:999, fontSize:11.5, fontWeight:700, color:"#9A4B12", letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:22 }}>
+            {CMS_BADGE}
+          </div>
+          <h1 style={{ fontSize:"clamp(38px, 4.6vw, 60px)", fontWeight:700, letterSpacing:"-0.035em", lineHeight:1.02, margin:0, color:ink }}>
+            Ngừng quản lý bằng cảm giác.
+          </h1>
+          <h1 style={{ fontSize:"clamp(38px, 4.6vw, 60px)", fontWeight:500, letterSpacing:"-0.035em", lineHeight:1.08, margin:"4px 0 0", color:muted, display:"inline-flex", alignItems:"baseline", flexWrap:"wrap", gap:14 }}>
+            <span>Bắt đầu đo lường bằng</span>
+            <span style={{ fontFamily:"'Instrument Serif', Georgia, serif", fontStyle:"italic", color:accent, fontWeight:500, fontSize:"clamp(44px, 5.2vw, 68px)", position:"relative", paddingRight:4, lineHeight:1 }}>
+              số liệu.
+              <HandUnderline color={accent} strokeWidth={5} />
+            </span>
+          </h1>
+          <p style={{ fontSize:16.5, color:muted, marginTop:28, lineHeight:1.55, maxWidth:540 }}>
+            Hệ thống <strong style={{ color:ink, fontWeight:600 }}>Master Budget Tracker Pro</strong> tinh gọn giúp bạn kiểm soát 100% Tài chính của mình — chỉ với{" "}
+            <em style={{ fontStyle:"normal", color:ink, fontWeight:600, borderBottom:`2px solid ${accent}`, paddingBottom:1 }}>10 phút mỗi tuần.</em>
+          </p>
+          <ul style={{ margin:"28px 0 0", padding:0, listStyle:"none", display:"flex", flexDirection:"column", gap:10 }}>
+            {["Dashboard 1-page · nhìn 3 giây nắm hết chỉ số","Dự báo dòng tiền tự động cho 6 tháng tới","Framework hoạch định mục tiêu tự do tài chính","Tải về dùng ngay · không cần kỹ thuật"].map((b,i) => (
+              <li key={i} style={{ display:"flex", alignItems:"center", gap:12, fontSize:14.5, color:ink, fontWeight:500 }}>
+                <span style={{ width:22, height:22, borderRadius:6, background:`${accent}15`, color:accent, display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12 L 10 17 L 19 7" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </span>
+                {b}
+              </li>
+            ))}
+          </ul>
+          <div style={{ marginTop:36, display:"flex", alignItems:"center", gap:18, flexWrap:"wrap" }}>
+            <div>
+              <div style={{ fontSize:11.5, color:muted, marginBottom:2 }}>Giảm 50% còn:</div>
+              <div style={{ display:"flex", alignItems:"baseline", gap:10 }}>
+                <span style={{ fontSize:36, fontWeight:700, color:ink, letterSpacing:"-0.02em" }}>{CMS_PRICE_SALE}</span>
+                <span style={{ fontSize:16, color:muted, textDecoration:"line-through" }}>{CMS_PRICE_ORIG}</span>
+              </div>
+            </div>
+            <a href="#pricing" style={{ background:accent, color:"#fff", padding:"18px 32px", borderRadius:999, textDecoration:"none", fontWeight:700, fontSize:15.5, letterSpacing:"-0.01em", boxShadow:"0 18px 36px rgba(42,91,255,0.36), inset 0 1px 0 rgba(255,255,255,0.2)", display:"inline-flex", alignItems:"center", gap:10, transition:"transform .18s ease, box-shadow .18s ease" }}
+              onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 22px 42px rgba(42,91,255,0.46), inset 0 1px 0 rgba(255,255,255,0.2)"}}
+              onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 18px 36px rgba(42,91,255,0.36), inset 0 1px 0 rgba(255,255,255,0.2)"}}>
+              {CMS_CTA}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12 H 19 M 13 6 L 19 12 L 13 18" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </a>
+          </div>
+          <div style={{ marginTop:18, display:"flex", alignItems:"center", gap:16, flexWrap:"wrap", fontSize:12.5, color:muted }}>
+            <span>⚡ Tải về dùng ngay</span>
+            <span>🔁 Cập nhật trọn đời</span>
+            <span>💌 Hỗ trợ qua email</span>
+          </div>
+          <div style={{ marginTop:28, padding:"14px 18px", background:"#fff", border:"1px solid rgba(14,18,38,0.08)", borderRadius:14, display:"flex", alignItems:"center", gap:18, flexWrap:"wrap", boxShadow:"0 6px 16px rgba(14,18,38,0.04)" }}>
+            <div style={{ display:"flex" }}>
+              {["#FFB088","#A5C8FF","#C7B0FF","#FFD584","#A8D5BA"].map((c,i) => (
+                <div key={i} style={{ width:28, height:28, borderRadius:"50%", background:c, border:"2px solid #fff", marginLeft: i===0 ? 0 : -8, boxShadow:"0 2px 4px rgba(0,0,0,0.06)" }}/>
+              ))}
+            </div>
+            <div style={{ display:"flex", flexDirection:"column", gap:2 }}>
+              <div style={{ fontSize:13, fontWeight:600, color:ink }}>⭐⭐⭐⭐⭐ <span style={{ marginLeft:6 }}>{CMS_RATING} / 5.0</span></div>
+              <div style={{ fontSize:11.5, color:muted }}>{CMS_CUSTOMERS} người đã mua · {CMS_REVIEWS} đánh giá tuần này</div>
+            </div>
+            <div style={{ width:1, height:32, background:"rgba(14,18,38,0.08)" }}/>
+            <div style={{ display:"flex", flexDirection:"column", gap:2 }}>
+              <div style={{ fontSize:13, fontWeight:600, color:ink }}>💸 Hoàn tiền 14 ngày</div>
+              <div style={{ fontSize:11.5, color:muted }}>Không hỏi lý do</div>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT — product preview */}
+        <div style={{ position:"relative", height:600 }}>
+          <div style={{ position:"absolute", inset:0, borderRadius:28, background:"radial-gradient(ellipse 60% 50% at 80% 20%, rgba(255,200,170,0.45), transparent 60%), radial-gradient(ellipse 50% 50% at 20% 80%, rgba(168,194,255,0.55), transparent 60%), linear-gradient(160deg, #E4ECFB 0%, #C9D6F2 60%, #8FA8E6 100%)", boxShadow:"0 30px 60px rgba(14,18,38,0.14), inset 0 1px 0 rgba(255,255,255,0.4)", overflow:"hidden" }}>
+            <div style={{ position:"absolute", inset:0, backgroundImage:"radial-gradient(rgba(255,255,255,0.18) 1.5px, transparent 1.5px)", backgroundSize:"12px 12px", mixBlendMode:"overlay", opacity:0.5 }}/>
+          </div>
+          {/* Dashboard card */}
+          <div style={{ position:"absolute", top:60, left:36, right:36, background:"#fff", borderRadius:16, padding:"16px 18px 20px", boxShadow:"0 30px 60px rgba(14,18,38,0.22), 0 4px 8px rgba(14,18,38,0.10)", border:"1px solid rgba(14,18,38,0.06)" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14, paddingBottom:12, borderBottom:"1px solid rgba(14,18,38,0.06)" }}>
+              <div>
+                <div style={{ fontSize:11, color:muted, fontWeight:600, textTransform:"uppercase", letterSpacing:"0.08em" }}>Tổng quan T7 · 2025</div>
+                <div style={{ fontSize:22, fontWeight:700, letterSpacing:"-0.02em", color:ink, marginTop:2 }}>Master Budget Tracker</div>
+              </div>
+              <span style={{ fontSize:10.5, fontWeight:700, padding:"4px 9px", background:"#DCFCE7", color:"#15803D", borderRadius:999 }}>↑ +18% tháng này</span>
+            </div>
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:14, marginBottom:18 }}>
+              {[{l:"Thu nhập",v:"28.4M",c:"#10B981"},{l:"Chi tiêu",v:"18.6M",c:"#F97316"},{l:"Tiết kiệm",v:"9.8M",c:accent}].map((s,i) => (
+                <div key={i} style={{ background:"#FAFAF7", padding:"10px 12px", borderRadius:10 }}>
+                  <div style={{ fontSize:10.5, color:muted, marginBottom:4 }}>{s.l}</div>
+                  <div style={{ fontSize:18, fontWeight:700, color:s.c, letterSpacing:"-0.02em" }}>{s.v}₫</div>
+                </div>
+              ))}
+            </div>
+            <svg viewBox="0 0 420 130" style={{ width:"100%", height:130 }}>
+              <defs>
+                <linearGradient id="prod-cobalt" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={accent} stopOpacity="0.30"/>
+                  <stop offset="100%" stopColor={accent} stopOpacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0 110 C 40 95, 80 70, 120 78 S 200 55, 240 60 S 320 30, 360 38 S 410 12, 420 18 L 420 130 L 0 130 Z" fill="url(#prod-cobalt)"/>
+              <path d="M0 110 C 40 95, 80 70, 120 78 S 200 55, 240 60 S 320 30, 360 38 S 410 12, 420 18" stroke={accent} strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+              {[[0,110],[120,78],[240,60],[360,38],[420,18]].map(([x,y],i) => (
+                <circle key={i} cx={x} cy={y} r="3.5" fill="#fff" stroke={accent} strokeWidth="2"/>
+              ))}
+            </svg>
+            <div style={{ marginTop:14, display:"flex", flexDirection:"column", gap:8 }}>
+              {[{l:"Ăn uống · siêu thị",pct:38,c:"#F97316",val:"4.2M"},{l:"Đi lại · xăng xe",pct:22,c:"#2A5BFF",val:"2.4M"},{l:"Giải trí",pct:16,c:"#FF6B9C",val:"1.8M"}].map((r,i) => (
+                <div key={i} style={{ display:"flex", alignItems:"center", gap:10, fontSize:11.5 }}>
+                  <span style={{ width:22, height:22, borderRadius:6, background:r.c }}/>
+                  <span style={{ flex:1, fontWeight:500, color:ink }}>{r.l}</span>
+                  <div style={{ flex:1, height:5, background:"rgba(14,18,38,0.06)", borderRadius:3, overflow:"hidden", maxWidth:120 }}>
+                    <div style={{ height:"100%", width:`${r.pct}%`, background:r.c }}/>
+                  </div>
+                  <span style={{ fontWeight:700, color:ink, minWidth:40, textAlign:"right" }}>{r.val}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Floating notification */}
+          <div style={{ position:"absolute", right:-10, top:30, background:"#fff", borderRadius:12, padding:"10px 14px", boxShadow:"0 18px 36px rgba(14,18,38,0.18)", border:"1px solid rgba(14,18,38,0.06)", transform:"rotate(4deg)", display:"flex", alignItems:"center", gap:10, maxWidth:220 }}>
+            <span style={{ width:32, height:32, borderRadius:"50%", background:"#DCFCE7", display:"inline-flex", alignItems:"center", justifyContent:"center", fontSize:16, flex:"0 0 32px" }}>🎯</span>
+            <div>
+              <div style={{ fontSize:11.5, fontWeight:700, color:ink }}>Đạt mục tiêu tiết kiệm!</div>
+              <div style={{ fontSize:10, color:muted }}>9.8M / 9M · vượt 8%</div>
+            </div>
+          </div>
+          {/* Sticky note */}
+          <StickyNote bg="#FFF188" rotate={-8} width={140} height={130} pin pinColor="#E23B3B" style={{ position:"absolute", left:-14, bottom:50, zIndex:2 }}>
+            <div style={{ fontSize:18, lineHeight:1.2, color:"#3a2f0a", fontWeight:500 }}>"Tháng đầu đã thấy rõ tiền đi đâu" ✦</div>
+          </StickyNote>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── HOOKS SECTION ────────────────────────────────────────────────────────────
+
+function ProductHooks() {
+  const accent = "#2A5BFF", ink = "#0E1226", muted = "rgba(14,18,38,0.55)";
+  const hooks = [
+    { num:"01", label:"SỰ THẬT PHŨ PHÀNG", color:"#FF6B9C", colorSoft:"rgba(255,107,156,0.10)", headline:"Bạn không thiếu năng lực — bạn thiếu hệ thống đo lường.", body:"Bận rộn 12 tiếng mỗi ngày nhưng cuối tháng vẫn mơ hồ về kết quả? Nếu không thể số hóa, bạn không thể tối ưu.", visual:"chaos" },
+    { num:"02", label:"CÁI BẪY CÔNG CỤ", color:"#F97316", colorSoft:"rgba(249,115,22,0.10)", headline:"Đừng tự mò mẫm — hãy mua lại thời gian.", body:"Đừng lãng phí hàng tuần trời tự dựng file Excel rườm rà rồi bỏ xó sau 3 ngày. Hệ thống này là phím tắt đã được chứng minh hiệu quả.", visual:"trap" },
+    { num:"03", label:"CHI PHÍ CỦA SỰ TRÌ HOÃN", color:accent, colorSoft:"rgba(42,91,255,0.10)", headline:"Mỗi ngày trì hoãn = một ngày mất tiền.", body:"Mỗi ngày bạn sống trong sự hỗn loạn không có số liệu rõ ràng là một ngày bạn đang tự đánh mất tiền bạc, năng lượng và các cơ hội. Sự rõ ràng chính là sức mạnh.", visual:"cost" },
+  ];
+
+  function HookVisual({ kind, color }) {
+    if (kind === "chaos") return (
+      <div style={{ position:"relative", width:"100%", height:200, background:"#FAFAF7", borderRadius:12, overflow:"hidden", padding:14 }}>
+        {[{x:-10,y:8,rot:-8,w:110},{x:100,y:24,rot:5,w:90},{x:-20,y:60,rot:4,w:130},{x:110,y:80,rot:-6,w:100},{x:30,y:110,rot:-3,w:120},{x:140,y:140,rot:7,w:80}].map((s,i) => (
+          <div key={i} style={{ position:"absolute", left:s.x, top:s.y, width:s.w, height:26, background:"#fff", border:"1px solid rgba(14,18,38,0.08)", borderRadius:4, transform:`rotate(${s.rot}deg)`, padding:"6px 8px", fontSize:9, color:"rgba(14,18,38,0.5)", fontFamily:"monospace", overflow:"hidden", whiteSpace:"nowrap", textOverflow:"ellipsis", boxShadow:"0 4px 10px rgba(14,18,38,0.06)" }}>chi tiêu cafe 35k...</div>
+        ))}
+        <div style={{ position:"absolute", right:14, top:14, width:48, height:48, borderRadius:"50%", background:color, color:"#fff", display:"flex", alignItems:"center", justifyContent:"center", fontSize:26, fontWeight:800, boxShadow:`0 10px 20px ${color}55` }}>?</div>
+      </div>
+    );
+    if (kind === "trap") return (
+      <div style={{ position:"relative", width:"100%", height:200, background:"#FAFAF7", borderRadius:12, padding:18 }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10, fontSize:11, fontWeight:700, color:ink }}>
+          Thời gian tự dựng vs Hệ thống <span style={{ color, fontSize:10 }}>tiết kiệm 32 giờ</span>
+        </div>
+        <div style={{ display:"flex", alignItems:"flex-end", gap:24, height:130, padding:"0 20px" }}>
+          <div style={{ flex:1, height:"100%", background:`linear-gradient(180deg, ${color} 0%, #C2410C 100%)`, borderRadius:"6px 6px 0 0", position:"relative", boxShadow:`0 10px 20px ${color}40` }}>
+            <div style={{ position:"absolute", top:-22, left:"50%", transform:"translateX(-50%)", fontSize:11, fontWeight:700, color:ink, whiteSpace:"nowrap" }}>40 giờ</div>
+            <div style={{ position:"absolute", bottom:-22, left:0, right:0, textAlign:"center", fontSize:10, color:muted, fontWeight:600 }}>Tự dựng</div>
+          </div>
+          <div style={{ flex:1, height:"20%", background:`linear-gradient(180deg, ${accent} 0%, #1B43D9 100%)`, borderRadius:"6px 6px 0 0", position:"relative", boxShadow:"0 6px 14px rgba(42,91,255,0.32)" }}>
+            <div style={{ position:"absolute", top:-22, left:"50%", transform:"translateX(-50%)", fontSize:11, fontWeight:700, color:accent, whiteSpace:"nowrap" }}>8 giờ</div>
+            <div style={{ position:"absolute", bottom:-22, left:0, right:0, textAlign:"center", fontSize:10, color:muted, fontWeight:600 }}>Hệ thống</div>
+          </div>
+        </div>
+      </div>
+    );
+    return (
+      <div style={{ position:"relative", width:"100%", height:200, background:"#FAFAF7", borderRadius:12, padding:18, overflow:"hidden" }}>
+        <div style={{ fontSize:11, fontWeight:700, color:ink, marginBottom:10 }}>Tiết kiệm 6 tháng — chậm 1 năm</div>
+        <svg viewBox="0 0 320 140" style={{ width:"100%", height:140 }}>
+          <defs><linearGradient id="cost-good" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={accent} stopOpacity="0.4"/><stop offset="100%" stopColor={accent} stopOpacity="0"/></linearGradient></defs>
+          <path d="M0 120 C 60 100, 120 60, 200 30 L 320 5 L 320 140 L 0 140 Z" fill="url(#cost-good)"/>
+          <path d="M0 120 C 60 100, 120 60, 200 30 L 320 5" stroke={accent} strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+          <path d="M0 130 L 320 90" stroke="rgba(14,18,38,0.4)" strokeWidth="2" strokeDasharray="4 4" strokeLinecap="round"/>
+          <text x="310" y="14" textAnchor="end" fontSize="9" fontWeight="700" fill={accent}>+27M</text>
+          <text x="310" y="86" textAnchor="end" fontSize="9" fontWeight="700" fill="rgba(14,18,38,0.5)">trì hoãn: +9M</text>
+        </svg>
+      </div>
+    );
+  }
+
+  return (
+    <section style={{ padding:"100px 28px 60px", background:"#FAFAF7" }}>
+      <div style={{ maxWidth:1180, margin:"0 auto" }}>
+        <div style={{ textAlign:"center", marginBottom:56 }}>
+          <div style={{ fontSize:11.5, fontWeight:700, color:accent, letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:14 }}>✦ Vì sao bạn cần hệ thống này ngay</div>
+          <h2 style={{ fontSize:"clamp(36px, 5vw, 56px)", fontWeight:600, letterSpacing:"-0.035em", lineHeight:1.05, margin:0, color:ink, maxWidth:720, marginLeft:"auto", marginRight:"auto" }}>
+            3 sự thật mà 95% người{" "}
+            <span style={{ fontFamily:"'Instrument Serif', Georgia, serif", fontStyle:"italic", color:accent, fontWeight:500 }}>chưa muốn thừa nhận.</span>
+          </h2>
+        </div>
+        <div style={{ display:"flex", flexDirection:"column", gap:28 }}>
+          {hooks.map((h, i) => (
+            <div key={h.num} style={{ background:"#fff", borderRadius:22, border:"1px solid rgba(14,18,38,0.06)", overflow:"hidden", display:"grid", gridTemplateColumns: i%2===0 ? "1.4fr 1fr" : "1fr 1.4fr", boxShadow:"0 16px 36px rgba(14,18,38,0.06), 0 2px 4px rgba(14,18,38,0.04)", transition:"transform .25s ease, box-shadow .25s ease" }}
+              onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow="0 22px 48px rgba(14,18,38,0.10), 0 4px 6px rgba(14,18,38,0.05)"}}
+              onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 16px 36px rgba(14,18,38,0.06), 0 2px 4px rgba(14,18,38,0.04)"}}>
+              <div style={{ padding:"44px 48px", display:"flex", flexDirection:"column", justifyContent:"center", order: i%2===0 ? 0 : 1 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:18 }}>
+                  <span style={{ fontSize:44, fontWeight:700, color:h.color, fontFamily:"'Instrument Serif', Georgia, serif", fontStyle:"italic", lineHeight:1 }}>{h.num}</span>
+                  <span style={{ flex:1, height:1.5, background:h.colorSoft }}/>
+                  <span style={{ fontSize:11, fontWeight:700, color:h.color, letterSpacing:"0.12em", textTransform:"uppercase" }}>{h.label}</span>
+                </div>
+                <h3 style={{ fontSize:"clamp(22px, 2.6vw, 32px)", fontWeight:600, letterSpacing:"-0.025em", lineHeight:1.15, margin:0, color:ink }}>{h.headline}</h3>
+                <p style={{ fontSize:15.5, color:muted, marginTop:14, lineHeight:1.6, fontStyle:"italic" }}>"{h.body}"</p>
+              </div>
+              <div style={{ padding:24, background:h.colorSoft, display:"flex", alignItems:"center", order: i%2===0 ? 1 : 0 }}>
+                <HookVisual kind={h.visual} color={h.color}/>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── CTA INTERRUPT ────────────────────────────────────────────────────────────
+
+function ProductCTAInterrupt() {
+  const accent = "#2A5BFF", ink = "#0E1226";
+  return (
+    <section style={{ padding:"32px 28px 60px" }}>
+      <div style={{ maxWidth:1180, margin:"0 auto", background:`linear-gradient(135deg, ${accent} 0%, #1B43D9 100%)`, borderRadius:22, padding:"36px 40px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:24, flexWrap:"wrap", color:"#fff", position:"relative", overflow:"hidden", boxShadow:"0 24px 50px rgba(42,91,255,0.32)" }}>
+        <div style={{ position:"absolute", top:"-30%", right:"10%", width:300, height:300, background:"radial-gradient(ellipse, rgba(255,255,255,0.18), transparent 70%)", filter:"blur(20px)", pointerEvents:"none" }}/>
+        <div style={{ position:"absolute", inset:0, backgroundImage:"radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px)", backgroundSize:"22px 22px", maskImage:"radial-gradient(ellipse 60% 70% at 50% 50%, #000 30%, transparent 100%)", WebkitMaskImage:"radial-gradient(ellipse 60% 70% at 50% 50%, #000 30%, transparent 100%)", pointerEvents:"none" }}/>
+        <div style={{ position:"relative", zIndex:2, flex:1, minWidth:280 }}>
+          <div style={{ fontSize:11.5, fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase", color:"rgba(255,255,255,0.7)", marginBottom:8 }}>CTA Interrupt · Đừng đợi</div>
+          <h3 style={{ fontSize:"clamp(26px, 3.4vw, 38px)", fontWeight:600, letterSpacing:"-0.025em", lineHeight:1.1, margin:0, color:"#fff" }}>
+            Ngừng lãng phí hiệu suất của bạn —{" "}
+            <span style={{ fontFamily:"'Instrument Serif', Georgia, serif", fontStyle:"italic", fontWeight:500 }}>ngay hôm nay.</span>
+          </h3>
+          <div style={{ fontSize:13.5, color:"rgba(255,255,255,0.75)", marginTop:10 }}>Giá ưu đãi 299.000₫ chỉ áp dụng cho 100 lượt mua đầu — đã bán 73/100.</div>
+          <div style={{ marginTop:10, height:5, background:"rgba(255,255,255,0.18)", borderRadius:3, overflow:"hidden", maxWidth:360 }}>
+            <div style={{ height:"100%", width:"73%", background:"#fff", borderRadius:3 }}/>
+          </div>
+        </div>
+        <a href="#pricing" style={{ position:"relative", zIndex:2, background:"#fff", color:ink, padding:"18px 32px", borderRadius:999, textDecoration:"none", fontWeight:700, fontSize:15, display:"inline-flex", alignItems:"center", gap:10, boxShadow:"0 14px 28px rgba(14,18,38,0.18), inset 0 1px 0 rgba(255,255,255,0.6)", transition:"transform .18s ease" }}
+          onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"} onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
+          Mua ngay với ưu đãi
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12 H 19 M 13 6 L 19 12 L 13 18" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </a>
+      </div>
+    </section>
+  );
+}
+
+// ─── WHAT'S INSIDE ────────────────────────────────────────────────────────────
+
+function ProductInside() {
+  const accent = "#2A5BFF", ink = "#0E1226", muted = "rgba(14,18,38,0.55)";
+  const items = [
+    { tag:"01", title:"Framework định hướng", shortHook:"Nhập mục tiêu → tự động bóc tách lộ trình hành động.", desc:"Hệ thống nhập một mục tiêu tài chính lớn (mua nhà, nghỉ hưu, quỹ khẩn cấp...). Sheet tự chia thành cột mốc tháng — bạn biết chính xác cần tiết kiệm bao nhiêu mỗi tuần.", bullets:["Goal Mapper","Lộ trình 12 tháng","Cảnh báo lệch mục tiêu"], visual:"framework" },
+    { tag:"02", title:"Dashboard Tracking 1-Page", shortHook:"Nhìn 3 giây → nắm trọn toàn bộ chỉ số cốt lõi.", desc:"Một trang duy nhất hiển thị: dòng tiền tháng, phân bổ chi tiêu, tốc độ tiết kiệm, dự báo 6 tháng. Tất cả tự update khi bạn nhập 1 dòng giao dịch.", bullets:["Pivot tự động","Conditional formatting","Mobile-friendly"], visual:"dashboard" },
+    { tag:"03", title:"Hướng dẫn vận hành tinh gọn", shortHook:"Xem 5 phút → dùng được ngay.", desc:"5 video ngắn (mỗi video 60-90s) hướng dẫn nhập liệu, tùy chỉnh danh mục, đọc dashboard. Không cần biết công thức Excel.", bullets:["5 video < 8 phút","Quick reference PDF","Hỗ trợ qua email"], visual:"guide" },
+  ];
+
+  function VisualPreview({ kind }) {
+    if (kind === "framework") return (
+      <div style={{ width:"100%", background:"#fff", borderRadius:12, padding:"16px 18px", border:"1px solid rgba(14,18,38,0.06)", boxShadow:"0 14px 28px rgba(14,18,38,0.10)" }}>
+        <div style={{ fontSize:10.5, fontWeight:700, color:muted, textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:6 }}>Goal Mapper</div>
+        <div style={{ padding:"10px 12px", background:"#F8F4E9", border:"1px dashed rgba(249,115,22,0.4)", borderRadius:8, fontSize:12.5, fontWeight:600, color:ink, marginBottom:12 }}>🎯 Mục tiêu: Tiết kiệm 200 triệu mua xe (24 tháng)</div>
+        <div style={{ display:"flex", alignItems:"center", gap:4, marginBottom:10 }}>
+          {[1,2,3,4,5,6,7,8].map((n,i) => (
+            <React.Fragment key={n}>
+              <div style={{ width:28, height:28, borderRadius:"50%", background: i<3 ? accent : i===3 ? "#FFF" : `rgba(42,91,255,0.10)`, border: i===3 ? `2px solid ${accent}` : "none", color: i<3 ? "#fff" : muted, fontSize:10, fontWeight:700, display:"flex", alignItems:"center", justifyContent:"center", flex:"0 0 28px" }}>{i<3 ? "✓" : n*3}</div>
+              {i<7 && <div style={{ flex:1, height:2, background: i<2 ? accent : "rgba(42,91,255,0.15)" }}/>}
+            </React.Fragment>
+          ))}
+        </div>
+        <div style={{ display:"flex", justifyContent:"space-between", fontSize:10.5, color:muted, fontWeight:500 }}>
+          <span>Tháng 3 · ✓ 25M</span>
+          <span style={{ color:accent, fontWeight:700 }}>Hiện tại</span>
+          <span>Mốc 24 · 200M</span>
+        </div>
+      </div>
+    );
+    if (kind === "dashboard") return (
+      <div style={{ width:"100%", background:"#fff", borderRadius:12, padding:16, border:"1px solid rgba(14,18,38,0.06)", boxShadow:"0 14px 28px rgba(14,18,38,0.10)" }}>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:12 }}>
+          {[{l:"Net",v:"+9.8M",c:"#10B981"},{l:"Spend",v:"18.6M",c:"#F97316"},{l:"Save %",v:"34%",c:accent}].map((s,i) => (
+            <div key={i} style={{ background:"#FAFAF7", padding:"8px 10px", borderRadius:8 }}>
+              <div style={{ fontSize:9, color:muted, marginBottom:2 }}>{s.l}</div>
+              <div style={{ fontSize:14, fontWeight:700, color:s.c, letterSpacing:"-0.02em" }}>{s.v}</div>
+            </div>
+          ))}
+        </div>
+        <svg viewBox="0 0 280 70" style={{ width:"100%", height:70 }}>
+          <defs><linearGradient id="inside-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={accent} stopOpacity="0.32"/><stop offset="100%" stopColor={accent} stopOpacity="0"/></linearGradient></defs>
+          <path d="M0 55 C 30 48, 60 30, 100 36 S 180 18, 220 22 S 270 6, 280 10 L 280 70 L 0 70 Z" fill="url(#inside-area)"/>
+          <path d="M0 55 C 30 48, 60 30, 100 36 S 180 18, 220 22 S 270 6, 280 10" stroke={accent} strokeWidth="2" fill="none"/>
+        </svg>
+      </div>
+    );
+    return (
+      <div style={{ width:"100%", background:"#fff", borderRadius:12, padding:16, border:"1px solid rgba(14,18,38,0.06)", boxShadow:"0 14px 28px rgba(14,18,38,0.10)" }}>
+        <div style={{ fontSize:11, fontWeight:700, marginBottom:10, color:ink }}>5 video hướng dẫn</div>
+        {[{t:"Cài đặt ban đầu",d:"1:24"},{t:"Nhập giao dịch hàng ngày",d:"0:58"},{t:"Đọc dashboard",d:"1:42"}].map((v,i) => (
+          <div key={i} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 0", borderBottom: i===2 ? "none" : "1px solid rgba(14,18,38,0.06)" }}>
+            <div style={{ width:36, height:36, borderRadius:8, background:`linear-gradient(135deg, ${accent}, #1B43D9)`, color:"#fff", display:"flex", alignItems:"center", justifyContent:"center", fontSize:14, flex:"0 0 36px" }}>▶</div>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontSize:11.5, fontWeight:600, color:ink }}>{v.t}</div>
+              <div style={{ fontSize:10, color:muted }}>video · {v.d}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <section id="inside" style={{ padding:"60px 28px 100px", background:"#fff" }}>
+      <div style={{ maxWidth:1180, margin:"0 auto" }}>
+        <div style={{ textAlign:"center", marginBottom:56 }}>
+          <div style={{ fontSize:11.5, fontWeight:700, color:accent, letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:14 }}>What's Inside</div>
+          <h2 style={{ fontSize:"clamp(36px, 4.6vw, 56px)", fontWeight:600, letterSpacing:"-0.035em", lineHeight:1.05, margin:0, color:ink, maxWidth:740, marginLeft:"auto", marginRight:"auto" }}>
+            Bạn nhận được gì bên trong{" "}
+            <span style={{ fontFamily:"'Instrument Serif', Georgia, serif", fontStyle:"italic", color:accent, fontWeight:500 }}>hệ thống Plug-and-Play?</span>
+          </h2>
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:22 }}>
+          {items.map(it => (
+            <div key={it.tag} style={{ background:"#fff", borderRadius:22, border:"1px solid rgba(14,18,38,0.08)", padding:20, boxShadow:"0 12px 28px rgba(14,18,38,0.06), 0 2px 4px rgba(14,18,38,0.04)", display:"flex", flexDirection:"column", gap:18, transition:"transform .25s ease, box-shadow .25s ease" }}
+              onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow="0 22px 44px rgba(14,18,38,0.10), 0 4px 6px rgba(14,18,38,0.05)"}}
+              onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 12px 28px rgba(14,18,38,0.06), 0 2px 4px rgba(14,18,38,0.04)"}}>
+              <div style={{ padding:16, background:"linear-gradient(135deg, #F4F7FE 0%, #E8EEFB 100%)", borderRadius:14 }}>
+                <VisualPreview kind={it.visual}/>
+              </div>
+              <div>
+                <div style={{ display:"flex", alignItems:"baseline", gap:10, marginBottom:10 }}>
+                  <span style={{ fontSize:24, fontWeight:500, color:accent, fontFamily:"'Instrument Serif', Georgia, serif", fontStyle:"italic", lineHeight:1 }}>{it.tag}</span>
+                  <div style={{ fontSize:19, fontWeight:700, letterSpacing:"-0.02em", color:ink }}>{it.title}</div>
+                </div>
+                <div style={{ fontSize:13, fontWeight:600, color:accent, marginBottom:10 }}>{it.shortHook}</div>
+                <p style={{ fontSize:13.5, color:muted, lineHeight:1.55, margin:0 }}>{it.desc}</p>
+                <div style={{ marginTop:14, display:"flex", gap:6, flexWrap:"wrap" }}>
+                  {it.bullets.map(b => (
+                    <span key={b} style={{ fontSize:11, fontWeight:600, padding:"4px 10px", background:`${accent}10`, color:accent, borderRadius:999 }}>✦ {b}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── DEMO GALLERY ─────────────────────────────────────────────────────────────
+
+function ProductDemoGallery() {
+  const accent = "#2A5BFF", ink = "#0E1226", muted = "rgba(14,18,38,0.55)";
+  const [active, setActive] = React.useState(0);
+  const screens = [
+    { label:"Dashboard tổng quan", visual:"main" },
+    { label:"Phân loại chi tiêu", visual:"breakdown" },
+    { label:"Dự báo dòng tiền", visual:"forecast" },
+    { label:"Goal mapper", visual:"goal" },
+  ];
+
+  function Screen({ kind }) {
+    if (kind === "main") return (
+      <div style={{ padding:16 }}>
+        <div style={{ fontSize:11, color:muted, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:4 }}>Master Budget · Tháng 7</div>
+        <div style={{ fontSize:24, fontWeight:700, color:ink, marginBottom:18, letterSpacing:"-0.02em" }}>+9.8M₫ <span style={{ color:"#10B981", fontSize:14 }}>↑18%</span></div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10, marginBottom:18 }}>
+          {[{l:"Thu",v:"28.4M",c:"#10B981"},{l:"Chi",v:"18.6M",c:"#F97316"},{l:"Tiết kiệm",v:"9.8M",c:accent}].map((s,i) => (
+            <div key={i} style={{ background:"#FAFAF7", padding:"10px 12px", borderRadius:10 }}>
+              <div style={{ fontSize:10, color:muted }}>{s.l}</div>
+              <div style={{ fontSize:16, fontWeight:700, color:s.c }}>{s.v}₫</div>
+            </div>
+          ))}
+        </div>
+        <svg viewBox="0 0 420 100" style={{ width:"100%", height:100 }}>
+          <defs><linearGradient id="dem-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={accent} stopOpacity="0.32"/><stop offset="100%" stopColor={accent} stopOpacity="0"/></linearGradient></defs>
+          <path d="M0 80 C 40 70, 80 50, 120 56 S 200 30, 240 36 S 320 8, 360 14 S 410 4, 420 8 L 420 100 L 0 100 Z" fill="url(#dem-area)"/>
+          <path d="M0 80 C 40 70, 80 50, 120 56 S 200 30, 240 36 S 320 8, 360 14 S 410 4, 420 8" stroke={accent} strokeWidth="2.5" fill="none"/>
+        </svg>
+      </div>
+    );
+    if (kind === "breakdown") {
+      const rows = [{l:"🍔 Ăn uống · siêu thị",pct:38,val:"4.2M",c:"#F97316"},{l:"🚗 Đi lại · xăng xe",pct:22,val:"2.4M",c:"#2A5BFF"},{l:"🎬 Giải trí",pct:16,val:"1.8M",c:"#FF6B9C"},{l:"🏠 Cố định · hoá đơn",pct:14,val:"1.5M",c:"#8B5CF6"},{l:"🎯 Khác",pct:10,val:"1.1M",c:"#10B981"}];
+      return (
+        <div style={{ padding:18 }}>
+          <div style={{ fontSize:13.5, fontWeight:700, color:ink, marginBottom:14 }}>Phân loại chi tiêu · T7</div>
+          {rows.map((r,i) => (
+            <div key={i} style={{ display:"flex", alignItems:"center", gap:12, padding:"9px 0", fontSize:12.5, borderBottom: i===rows.length-1 ? "none" : "1px solid rgba(14,18,38,0.06)" }}>
+              <span style={{ flex:1, color:ink, fontWeight:500 }}>{r.l}</span>
+              <div style={{ width:140, height:6, background:"rgba(14,18,38,0.06)", borderRadius:3, overflow:"hidden" }}>
+                <div style={{ height:"100%", width:`${r.pct}%`, background:r.c }}/>
+              </div>
+              <span style={{ fontWeight:700, color:ink, minWidth:50, textAlign:"right" }}>{r.val}</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    if (kind === "forecast") return (
+      <div style={{ padding:18 }}>
+        <div style={{ fontSize:13.5, fontWeight:700, color:ink, marginBottom:14 }}>Dự báo dòng tiền · 6 tháng tới</div>
+        <svg viewBox="0 0 420 160" style={{ width:"100%", height:160 }}>
+          {[1,2,3,4].map(i => <line key={i} x1="0" x2="420" y1={i*30} y2={i*30} stroke="rgba(14,18,38,0.05)" strokeWidth="1"/>)}
+          <path d="M0 90 L 70 80 L 140 75 L 210 60 L 280 50 L 350 35 L 420 20" stroke={accent} strokeWidth="2.5" fill="none"/>
+          <path d="M210 60 L 280 50 L 350 35 L 420 20" stroke={accent} strokeWidth="2.5" strokeDasharray="6 4" fill="none"/>
+          {[[0,90,"T7"],[70,80,"T8"],[140,75,"T9"],[210,60,"T10"],[280,50,"T11"],[350,35,"T12"],[420,20,"T1"]].map(([x,y,l],i) => (
+            <g key={i}>
+              <circle cx={x} cy={y} r="4" fill="#fff" stroke={accent} strokeWidth="2"/>
+              <text x={x} y="150" textAnchor="middle" fontSize="10" fill="rgba(14,18,38,0.5)" fontWeight="600">{l}</text>
+            </g>
+          ))}
+          <text x="415" y="14" textAnchor="end" fontSize="11" fill={accent} fontWeight="700">80M dự báo</text>
+        </svg>
+      </div>
+    );
+    return (
+      <div style={{ padding:18 }}>
+        <div style={{ fontSize:13.5, fontWeight:700, color:ink, marginBottom:14 }}>Goal Mapper</div>
+        {[{l:"Quỹ khẩn cấp",goal:"30M",cur:27,c:"#10B981"},{l:"Mua xe máy",goal:"60M",cur:65,c:accent},{l:"Du lịch Nhật",goal:"40M",cur:38,c:"#F97316"},{l:"Học phí MBA",goal:"200M",cur:18,c:"#8B5CF6"}].map((g,i) => (
+          <div key={i} style={{ marginBottom:14 }}>
+            <div style={{ display:"flex", justifyContent:"space-between", fontSize:12, fontWeight:600, color:ink, marginBottom:4 }}>
+              <span>🎯 {g.l}</span>
+              <span style={{ color:muted, fontWeight:500 }}>{g.cur}% · mục tiêu {g.goal}</span>
+            </div>
+            <div style={{ height:8, background:"rgba(14,18,38,0.06)", borderRadius:4, overflow:"hidden" }}>
+              <div style={{ height:"100%", width:`${Math.min(100,g.cur)}%`, background:g.c, borderRadius:4 }}/>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <section style={{ padding:"0 28px 100px", background:"#fff" }}>
+      <div style={{ maxWidth:1180, margin:"0 auto" }}>
+        <div style={{ textAlign:"center", marginBottom:36 }}>
+          <div style={{ fontSize:11.5, fontWeight:700, color:accent, letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:12 }}>Xem trước</div>
+          <h3 style={{ fontSize:"clamp(28px, 3.6vw, 40px)", fontWeight:600, letterSpacing:"-0.025em", lineHeight:1.1, margin:0, color:ink }}>4 màn hình bên trong sheet</h3>
+        </div>
+        <div style={{ display:"flex", justifyContent:"center", gap:8, marginBottom:28, flexWrap:"wrap" }}>
+          {screens.map((s,i) => (
+            <button key={i} onClick={()=>setActive(i)} style={{ border:"none", cursor:"pointer", background: active===i ? ink : "#FAFAF7", color: active===i ? "#fff" : "rgba(14,18,38,0.55)", padding:"10px 18px", borderRadius:999, fontSize:12.5, fontWeight:600, fontFamily:"inherit", transition:"all .15s" }}>{s.label}</button>
+          ))}
+        </div>
+        <div style={{ background:"linear-gradient(135deg, #F4F7FE 0%, #E8EEFB 100%)", borderRadius:22, padding:28, display:"flex", justifyContent:"center", alignItems:"center" }}>
+          <div style={{ width:"100%", maxWidth:720, background:"#fff", borderRadius:16, border:"1px solid rgba(14,18,38,0.08)", boxShadow:"0 30px 60px rgba(14,18,38,0.14), 0 4px 8px rgba(14,18,38,0.06)", overflow:"hidden" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:8, padding:"10px 14px", borderBottom:"1px solid rgba(14,18,38,0.06)", background:"#FAFAF7" }}>
+              <div style={{ display:"flex", gap:6 }}>
+                <span style={{ width:10, height:10, borderRadius:"50%", background:"#FF6259" }}/>
+                <span style={{ width:10, height:10, borderRadius:"50%", background:"#FFBD2E" }}/>
+                <span style={{ width:10, height:10, borderRadius:"50%", background:"#28C840" }}/>
+              </div>
+              <div style={{ marginLeft:10, fontSize:11, fontWeight:600, color:"rgba(14,18,38,0.55)" }}>{screens[active].label}</div>
+            </div>
+            <Screen kind={screens[active].visual}/>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── TESTIMONIALS ─────────────────────────────────────────────────────────────
+
+function ProductTestimonials() {
+  const accent = "#2A5BFF", ink = "#0E1226", muted = "rgba(14,18,38,0.55)";
+  const reviews = [
+    { name:"Linh Trần", role:"Product Designer · TP.HCM", avatar:"#FFB088", quote:"Mình đã tự dựng Excel theo dõi chi tiêu 3 lần và bỏ cả 3 lần. Master Budget chỉ mất 15 phút setup và mình đã duy trì được 4 tháng. Lần đầu tiên mình thật sự biết tiền đi đâu.", rating:5, tag:"Đã dùng 4 tháng" },
+    { name:"Hà Minh", role:"Founder Startup · Hà Nội", avatar:"#A5C8FF", quote:"Phần dự báo dòng tiền 6 tháng là gold. Mình dùng để present cho co-founder mỗi cuối tháng. Tiết kiệm khoảng 4-5 giờ work mỗi tháng so với tự build.", rating:5, tag:"Đã dùng 2 tháng" },
+    { name:"Nguyễn Phương", role:"Marketing Lead · Đà Nẵng", avatar:"#C7B0FF", quote:"Cái Goal Mapper khiến mình thấy việc tiết kiệm 200tr mua xe không còn xa vời. Có lộ trình rõ ràng, mỗi tháng tick được 1 mốc thật sự rất thoả mãn.", rating:5, tag:"Đã dùng 6 tháng" },
+  ];
+  return (
+    <section id="reviews" style={{ padding:"100px 28px", background:"#FAFAF7" }}>
+      <div style={{ maxWidth:1180, margin:"0 auto" }}>
+        <div style={{ textAlign:"center", marginBottom:48 }}>
+          <div style={{ fontSize:11.5, fontWeight:700, color:accent, letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:14 }}>Người dùng nói gì</div>
+          <h2 style={{ fontSize:"clamp(32px, 4.2vw, 48px)", fontWeight:600, letterSpacing:"-0.03em", lineHeight:1.1, margin:0, color:ink }}>
+            +1.247 người đã{" "}
+            <span style={{ fontFamily:"'Instrument Serif', Georgia, serif", fontStyle:"italic", color:accent, fontWeight:500 }}>kiểm soát được tài chính</span> của họ.
+          </h2>
+        </div>
+        <div style={{ display:"flex", justifyContent:"center", gap:60, marginBottom:48, padding:"28px 0", background:"#fff", borderRadius:18, border:"1px solid rgba(14,18,38,0.06)", boxShadow:"0 12px 28px rgba(14,18,38,0.06)", flexWrap:"wrap" }}>
+          {[{v:CMS_RATING,l:"Đánh giá trung bình",suffix:"/ 5.0"},{v:CMS_CUSTOMERS,l:"Người mua",suffix:""},{v:CMS_REVIEWS,l:"Reviews tuần này",suffix:""},{v:"98%",l:"Khuyên dùng",suffix:""}].map((s,i) => (
+            <div key={i} style={{ textAlign:"center" }}>
+              <div style={{ fontSize:32, fontWeight:700, letterSpacing:"-0.02em", color:ink }}>{s.v}<span style={{ fontSize:14, color:muted, fontWeight:500 }}>{s.suffix}</span></div>
+              <div style={{ fontSize:11, color:muted, marginTop:4, textTransform:"uppercase", letterSpacing:"0.08em", fontWeight:600 }}>{s.l}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:20 }}>
+          {reviews.map((r,i) => (
+            <div key={i} style={{ background:"#fff", borderRadius:18, padding:24, border:"1px solid rgba(14,18,38,0.06)", boxShadow:"0 8px 22px rgba(14,18,38,0.05)", display:"flex", flexDirection:"column", gap:16 }}>
+              <div style={{ display:"flex", gap:2 }}>{[0,1,2,3,4].map(s => <span key={s} style={{ color:"#F59E0B", fontSize:14 }}>★</span>)}</div>
+              <p style={{ fontSize:14.5, color:ink, lineHeight:1.55, margin:0, flex:1 }}>"{r.quote}"</p>
+              <div style={{ display:"flex", alignItems:"center", gap:12, paddingTop:14, borderTop:"1px solid rgba(14,18,38,0.06)" }}>
+                <div style={{ width:40, height:40, borderRadius:"50%", background:r.avatar, flex:"0 0 40px", display:"flex", alignItems:"center", justifyContent:"center", fontSize:14, fontWeight:700, color:"#fff" }}>{r.name[0]}</div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:13.5, fontWeight:700, color:ink }}>{r.name}</div>
+                  <div style={{ fontSize:11.5, color:muted }}>{r.role}</div>
+                </div>
+                <span style={{ fontSize:10, fontWeight:700, padding:"3px 8px", background:`${accent}10`, color:accent, borderRadius:999, flexShrink:0 }}>{r.tag}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── COMPARISON ───────────────────────────────────────────────────────────────
+
+function ProductComparison() {
+  const accent = "#2A5BFF", ink = "#0E1226", muted = "rgba(14,18,38,0.55)";
+  const rows = [
+    { l:"Thời gian setup ban đầu", before:"12–40 giờ tự dựng Excel", after:"15 phút tải về & nhập số" },
+    { l:"Theo dõi chi tiêu hàng ngày", before:"5–10 phút mỗi ngày, dễ bỏ", after:"2 phút mỗi tuần, có nhắc" },
+    { l:"Báo cáo cuối tháng", before:"Phải tự tổng hợp, đoán mò", after:"Tự update, nhìn 3 giây hiểu" },
+    { l:"Dự báo dòng tiền tương lai", before:"Không có", after:"Tự động cho 6 tháng tới" },
+    { l:"Quản lý nhiều mục tiêu", before:"Quên hoặc bỏ giữa chừng", after:"Goal Mapper · tiến độ rõ ràng" },
+    { l:"Cập nhật & cải tiến", before:"Tự sửa, dễ bể công thức", after:"Update miễn phí trọn đời" },
+  ];
+  return (
+    <section style={{ padding:"100px 28px", background:"#fff" }}>
+      <div style={{ maxWidth:1080, margin:"0 auto" }}>
+        <div style={{ textAlign:"center", marginBottom:48 }}>
+          <div style={{ fontSize:11.5, fontWeight:700, color:accent, letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:14 }}>Trước · Sau</div>
+          <h2 style={{ fontSize:"clamp(32px, 4.2vw, 48px)", fontWeight:600, letterSpacing:"-0.03em", lineHeight:1.1, margin:0, color:ink }}>Cuộc sống của bạn — trước và sau hệ thống.</h2>
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1.4fr 1.4fr", gap:0, border:"1px solid rgba(14,18,38,0.08)", borderRadius:20, overflow:"hidden", background:"#fff", boxShadow:"0 16px 36px rgba(14,18,38,0.06)" }}>
+          <div style={{ padding:"20px 24px", background:"#FAFAF7", borderBottom:"1px solid rgba(14,18,38,0.08)", fontSize:11, fontWeight:700, color:muted, letterSpacing:"0.08em", textTransform:"uppercase" }}>Tình huống</div>
+          <div style={{ padding:"20px 24px", background:"#FFF4ED", borderBottom:"1px solid rgba(14,18,38,0.08)", borderLeft:"1px solid rgba(14,18,38,0.08)", display:"flex", alignItems:"center", gap:8, fontSize:13.5, fontWeight:700, color:"#9A4B12" }}>
+            <span style={{ width:22, height:22, borderRadius:6, background:"rgba(249,115,22,0.18)", display:"inline-flex", alignItems:"center", justifyContent:"center", fontSize:12 }}>✕</span>
+            Tự dựng / không có hệ thống
+          </div>
+          <div style={{ padding:"20px 24px", background:"#EFF4FE", borderBottom:"1px solid rgba(14,18,38,0.08)", borderLeft:"1px solid rgba(14,18,38,0.08)", display:"flex", alignItems:"center", gap:8, fontSize:13.5, fontWeight:700, color:accent }}>
+            <span style={{ width:22, height:22, borderRadius:6, background:`${accent}20`, color:accent, display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12 L 10 17 L 19 7" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </span>
+            Master Budget Tracker Pro
+          </div>
+          {rows.map((r,i) => (
+            <React.Fragment key={i}>
+              <div style={{ padding:"18px 24px", fontSize:13.5, fontWeight:600, color:ink, borderBottom: i===rows.length-1 ? "none" : "1px solid rgba(14,18,38,0.06)" }}>{r.l}</div>
+              <div style={{ padding:"18px 24px", fontSize:13, color:muted, borderLeft:"1px solid rgba(14,18,38,0.08)", borderBottom: i===rows.length-1 ? "none" : "1px solid rgba(14,18,38,0.06)", background:"#FFFBF8" }}>{r.before}</div>
+              <div style={{ padding:"18px 24px", fontSize:13, color:ink, fontWeight:500, borderLeft:"1px solid rgba(14,18,38,0.08)", borderBottom: i===rows.length-1 ? "none" : "1px solid rgba(14,18,38,0.06)", background:"#F7FAFF" }}>{r.after}</div>
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── PRICING ──────────────────────────────────────────────────────────────────
+
+function ProductPricing() {
+  const accent = "#2A5BFF", ink = "#0E1226", muted = "rgba(14,18,38,0.55)";
+  const valueStack = [
+    { l:`${CMS_PRODUCT_NAME} — Sheet chính`, v:CMS_PRICE_ORIG },
+    { l:"Goal Mapper Framework", v:"199.000₫" },
+    { l:"Forecast Dashboard 6 tháng", v:"149.000₫" },
+    { l:"Bộ 5 video hướng dẫn", v:"99.000₫" },
+  ];
+  const bonuses = [
+    { tag:"BONUS 01", title:"Habit Tracker Lite", desc:"Sheet phụ giúp duy trì thói quen ghi chép tài chính 21 ngày.", value:"129.000₫", icon:"🎯" },
+    { tag:"BONUS 02", title:"Quick Reference PDF", desc:"1 trang in ra dán bàn — công thức + phím tắt + best practices.", value:"49.000₫", icon:"📋" },
+    { tag:"BONUS 03", title:"Cộng đồng Telegram VIP", desc:"Hỏi đáp 1-1, chia sẻ best practice với 1.000+ thành viên.", value:"Vô giá", icon:"💬" },
+  ];
+  const totalNumeric = 599+199+149+99+129+49;
+  const totalLabel = totalNumeric.toLocaleString("vi-VN") + ".000₫";
+
+  return (
+    <section id="pricing" style={{ padding:"100px 28px", background:"#FAFAF7" }}>
+      <div style={{ maxWidth:1080, margin:"0 auto" }}>
+        <div style={{ textAlign:"center", marginBottom:48 }}>
+          <div style={{ fontSize:11.5, fontWeight:700, color:accent, letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:14 }}>Bảng giá · ưu đãi giới hạn</div>
+          <h2 style={{ fontSize:"clamp(32px, 4.4vw, 52px)", fontWeight:600, letterSpacing:"-0.03em", lineHeight:1.1, margin:0, color:ink }}>
+            Giá trị thực:{" "}
+            <span style={{ fontSize:"0.9em", color:muted, textDecoration:"line-through", fontWeight:500 }}>{totalLabel}</span>
+          </h2>
+          <p style={{ fontSize:16, color:muted, marginTop:12 }}>
+            Hôm nay bạn chỉ trả <strong style={{ color:ink, fontWeight:700 }}>{CMS_PRICE_SALE}</strong> — tiết kiệm{" "}
+            <span style={{ color:"#10B981", fontWeight:700 }}>{Math.round(((totalNumeric-299)/totalNumeric)*100)}%</span>
+          </p>
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:0, background:"#fff", borderRadius:24, border:"1px solid rgba(14,18,38,0.08)", overflow:"hidden", boxShadow:"0 28px 56px rgba(14,18,38,0.10), 0 4px 8px rgba(14,18,38,0.05)" }}>
+          {/* LEFT value stack */}
+          <div style={{ padding:"36px 32px" }}>
+            <div style={{ fontSize:11.5, fontWeight:700, color:muted, letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:20 }}>✦ Bạn nhận được</div>
+            <div style={{ display:"flex", flexDirection:"column", gap:12, marginBottom:28 }}>
+              {valueStack.map((v,i) => (
+                <div key={i} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom: i===valueStack.length-1 ? "none" : "1px solid rgba(14,18,38,0.06)" }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                    <span style={{ width:22, height:22, borderRadius:6, background:`${accent}15`, color:accent, display:"inline-flex", alignItems:"center", justifyContent:"center" }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12 L 10 17 L 19 7" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </span>
+                    <span style={{ fontSize:13.5, color:ink, fontWeight:500 }}>{v.l}</span>
+                  </div>
+                  <span style={{ fontSize:12, color:muted, fontWeight:600 }}>{v.v}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ fontSize:11.5, fontWeight:700, color:"#F97316", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:14 }}>🎁 Quà tặng kèm</div>
+            <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+              {bonuses.map((b,i) => (
+                <div key={i} style={{ display:"flex", alignItems:"flex-start", gap:12, padding:"12px 14px", background:"#FFF4ED", borderRadius:10, border:"1px dashed rgba(249,115,22,0.3)" }}>
+                  <span style={{ fontSize:18, flex:"0 0 18px" }}>{b.icon}</span>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", gap:8, marginBottom:2 }}>
+                      <span style={{ fontSize:12.5, fontWeight:700, color:ink }}>{b.tag} · {b.title}</span>
+                      <span style={{ fontSize:11, color:"#9A4B12", fontWeight:700, flexShrink:0 }}>{b.value}</span>
+                    </div>
+                    <div style={{ fontSize:11.5, color:muted, lineHeight:1.45 }}>{b.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* RIGHT price */}
+          <div style={{ padding:"36px 32px", background:`linear-gradient(160deg, ${ink} 0%, #1a2244 100%)`, color:"#fff", position:"relative", overflow:"hidden", display:"flex", flexDirection:"column", justifyContent:"center" }}>
+            <div style={{ position:"absolute", top:"-30%", right:"-10%", width:400, height:400, background:"radial-gradient(ellipse, rgba(42,91,255,0.30), transparent 70%)", filter:"blur(40px)", pointerEvents:"none" }}/>
+            <div style={{ position:"relative", zIndex:2 }}>
+              <div style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"4px 12px", background:"rgba(255,107,156,0.15)", border:"1px solid rgba(255,107,156,0.3)", borderRadius:999, fontSize:11, fontWeight:700, color:"#FF8FAE", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:24 }}>⚡ Còn 27 suất với giá này</div>
+              <div style={{ marginBottom:8 }}><span style={{ fontSize:16, color:"rgba(255,255,255,0.45)", textDecoration:"line-through" }}>{totalLabel}</span></div>
+              <div style={{ fontSize:56, fontWeight:700, letterSpacing:"-0.035em", lineHeight:1, marginBottom:8 }}>{CMS_PRICE_SALE}</div>
+              <div style={{ fontSize:12.5, color:"rgba(255,255,255,0.6)", marginBottom:28 }}>Một lần · trọn đời · không phí ẩn</div>
+              <a href="#checkout" style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:10, background:accent, color:"#fff", padding:"18px 24px", borderRadius:12, textDecoration:"none", fontWeight:700, fontSize:16, letterSpacing:"-0.01em", boxShadow:"0 18px 36px rgba(42,91,255,0.40), inset 0 1px 0 rgba(255,255,255,0.2)", transition:"transform .18s ease, box-shadow .18s ease", textAlign:"center" }}
+                onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 22px 42px rgba(42,91,255,0.50), inset 0 1px 0 rgba(255,255,255,0.2)"}}
+                onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 18px 36px rgba(42,91,255,0.40), inset 0 1px 0 rgba(255,255,255,0.2)"}}>
+                Bắt đầu tối ưu hóa ngay hôm nay
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12 H 19 M 13 6 L 19 12 L 13 18" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </a>
+              <div style={{ marginTop:14, textAlign:"center", fontSize:11.5, color:"rgba(255,255,255,0.55)" }}>💳 Thanh toán an toàn · ⚡ Nhận file trong 60 giây</div>
+              <div style={{ marginTop:18, display:"flex", justifyContent:"center", gap:6, flexWrap:"wrap" }}>
+                {["VISA","MC","MoMo","ZaloPay","VietQR"].map(p => (
+                  <span key={p} style={{ fontSize:10, fontWeight:700, padding:"4px 8px", background:"rgba(255,255,255,0.08)", border:"1px solid rgba(255,255,255,0.12)", borderRadius:6, color:"rgba(255,255,255,0.75)" }}>{p}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Guarantee */}
+        <div style={{ marginTop:32, background:"#fff", borderRadius:18, border:"1px solid rgba(14,18,38,0.08)", padding:"28px 32px", display:"flex", alignItems:"center", gap:28, boxShadow:"0 12px 28px rgba(14,18,38,0.05)", flexWrap:"wrap" }}>
+          <div style={{ width:80, height:80, borderRadius:"50%", background:"linear-gradient(135deg, #DCFCE7 0%, #BBF7D0 100%)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:32, flex:"0 0 80px", boxShadow:"0 8px 18px rgba(16,185,129,0.20)" }}>🛡️</div>
+          <div style={{ flex:1, minWidth:240 }}>
+            <div style={{ fontSize:11.5, fontWeight:700, color:"#15803D", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:6 }}>Cam kết của Bestlist</div>
+            <div style={{ fontSize:22, fontWeight:600, color:ink, letterSpacing:"-0.02em", marginBottom:6 }}>Hoàn tiền 100% trong 14 ngày — không hỏi lý do.</div>
+            <p style={{ fontSize:13.5, color:muted, lineHeight:1.55, margin:0 }}>Nếu sau 14 ngày dùng thử bạn cảm thấy hệ thống không phù hợp, gửi email đến hello@bestlist.ai — chúng tôi hoàn 100% tiền, bạn vẫn giữ được toàn bộ file đã tải về.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── FAQ ──────────────────────────────────────────────────────────────────────
+
+function ProductFAQ() {
+  const accent = "#2A5BFF", ink = "#0E1226", muted = "rgba(14,18,38,0.55)";
+  const [open, setOpen] = React.useState(0);
+  const faqs = [
+    { q:"Tôi không biết dùng Excel / Google Sheets — có dùng được không?", a:"Hoàn toàn được. Hệ thống đi kèm 5 video hướng dẫn ngắn (mỗi video 60-90 giây) chỉ cho bạn cách nhập liệu cơ bản. Không cần biết công thức — bạn chỉ điền số, sheet tự tính tất cả." },
+    { q:"Sheet này dùng trên Google Sheets hay Excel?", a:"Bạn nhận được cả 2 bản: Google Sheets (.xlsx import) và Microsoft Excel (.xlsx). Khuyên dùng Google Sheets vì có thể truy cập từ điện thoại miễn phí." },
+    { q:"Mua một lần dùng được mãi mãi đúng không?", a:"Đúng. Bạn trả 299.000₫ một lần và sở hữu trọn đời — bao gồm tất cả các bản cập nhật trong tương lai. Không có phí định kỳ, không có subscription." },
+    { q:"Nếu tôi không hài lòng thì sao?", a:"Trong 14 ngày kể từ khi mua, bạn có thể email hello@bestlist.ai yêu cầu hoàn tiền 100% mà không cần lý do. Bạn vẫn giữ được file đã tải về." },
+    { q:"Hệ thống có phù hợp với người làm freelancer / chủ doanh nghiệp nhỏ?", a:"Có. Sheet hỗ trợ phân loại theo nguồn thu nhập (lương, freelance, kinh doanh, đầu tư) và có cột riêng để theo dõi thu chi theo dự án. Phù hợp cả cá nhân lẫn chủ doanh nghiệp nhỏ." },
+    { q:"Tôi có thể chia sẻ file với vợ/chồng / đối tác không?", a:"Được. Sheet không có DRM. Bạn có thể chia sẻ quyền edit với bao nhiêu người cũng được trong gia đình hoặc đội nhóm — chúng tôi không kiểm soát." },
+  ];
+  return (
+    <section id="faq" style={{ padding:"100px 28px", background:"#fff" }}>
+      <div style={{ maxWidth:880, margin:"0 auto" }}>
+        <div style={{ textAlign:"center", marginBottom:48 }}>
+          <div style={{ fontSize:11.5, fontWeight:700, color:accent, letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:14 }}>Câu hỏi thường gặp</div>
+          <h2 style={{ fontSize:"clamp(32px, 4.2vw, 48px)", fontWeight:600, letterSpacing:"-0.03em", lineHeight:1.1, margin:0, color:ink }}>
+            Trước khi bạn{" "}
+            <span style={{ fontFamily:"'Instrument Serif', Georgia, serif", fontStyle:"italic", color:accent, fontWeight:500 }}>hỏi.</span>
+          </h2>
+        </div>
+        <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+          {faqs.map((f,i) => {
+            const isOpen = open === i;
+            return (
+              <div key={i} style={{ background:"#FAFAF7", borderRadius:14, border:`1px solid ${isOpen ? "rgba(42,91,255,0.25)" : "rgba(14,18,38,0.06)"}`, overflow:"hidden", transition:"border-color .2s" }}>
+                <button onClick={()=>setOpen(isOpen ? -1 : i)} style={{ width:"100%", textAlign:"left", padding:"18px 22px", background:"transparent", border:"none", cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", justifyContent:"space-between", gap:14, color:ink, fontSize:15, fontWeight:600 }}>
+                  {f.q}
+                  <span style={{ width:28, height:28, borderRadius:"50%", background: isOpen ? accent : "rgba(14,18,38,0.06)", color: isOpen ? "#fff" : ink, display:"inline-flex", alignItems:"center", justifyContent:"center", flex:"0 0 28px", fontSize:14, transition:"all .2s" }}>{isOpen ? "−" : "+"}</span>
+                </button>
+                {isOpen && <div style={{ padding:"0 22px 20px", fontSize:14, color:muted, lineHeight:1.6 }}>{f.a}</div>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── FINAL CTA ────────────────────────────────────────────────────────────────
+
+function ProductFinalCTA() {
+  const accent = "#2A5BFF", ink = "#0E1226";
+  return (
+    <section style={{ padding:"0 28px 60px" }}>
+      <div style={{ maxWidth:1180, margin:"0 auto", background:`linear-gradient(135deg, ${accent} 0%, #1B43D9 60%, ${ink} 100%)`, borderRadius:28, padding:"80px 48px", position:"relative", overflow:"hidden", textAlign:"center", color:"#fff" }}>
+        <div style={{ position:"absolute", top:"-20%", left:"10%", width:500, height:500, background:"radial-gradient(ellipse, rgba(255,200,170,0.25), transparent 70%)", filter:"blur(40px)", pointerEvents:"none" }}/>
+        <div style={{ position:"absolute", inset:0, backgroundImage:"radial-gradient(rgba(255,255,255,0.10) 1px, transparent 1px)", backgroundSize:"26px 26px", maskImage:"radial-gradient(ellipse 70% 60% at 50% 50%, #000 30%, transparent 100%)", WebkitMaskImage:"radial-gradient(ellipse 70% 60% at 50% 50%, #000 30%, transparent 100%)", pointerEvents:"none" }}/>
+        <div style={{ position:"relative", zIndex:2 }}>
+          <div style={{ fontSize:11.5, fontWeight:700, color:"rgba(255,255,255,0.75)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:18 }}>✦ Quyết định nằm ở đây</div>
+          <h2 style={{ fontSize:"clamp(40px, 5.6vw, 68px)", fontWeight:700, letterSpacing:"-0.035em", lineHeight:1.0, margin:0, color:"#fff", maxWidth:800, marginLeft:"auto", marginRight:"auto" }}>
+            Bắt đầu{" "}
+            <span style={{ fontFamily:"'Instrument Serif', Georgia, serif", fontStyle:"italic", fontWeight:500 }}>tối ưu hóa</span> ngay hôm nay.
+          </h2>
+          <p style={{ fontSize:17, color:"rgba(255,255,255,0.85)", marginTop:22, maxWidth:560, margin:"22px auto 0", lineHeight:1.55 }}>
+            {CMS_PRICE_SALE} hôm nay · vs. nhiều năm sống trong sự mơ hồ tài chính. Lựa chọn này thật sự dễ hơn bạn nghĩ.
+          </p>
+          <div style={{ display:"flex", gap:14, alignItems:"center", justifyContent:"center", marginTop:36, flexWrap:"wrap" }}>
+            <a href="#pricing" style={{ background:"#fff", color:ink, padding:"18px 36px", borderRadius:999, textDecoration:"none", fontWeight:700, fontSize:16, boxShadow:"0 18px 36px rgba(14,18,38,0.30), inset 0 1px 0 rgba(255,255,255,0.6)", display:"inline-flex", alignItems:"center", gap:10, transition:"transform .18s ease" }}
+              onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"} onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
+              Mua ngay {CMS_PRICE_SALE}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12 H 19 M 13 6 L 19 12 L 13 18" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </a>
+            <a href="#faq" style={{ color:"#fff", fontSize:13.5, fontWeight:600, textDecoration:"none", borderBottom:"1.5px solid rgba(255,255,255,0.45)", paddingBottom:2, transition:"border-color .15s" }}
+              onMouseEnter={e=>e.currentTarget.style.borderColor="#fff"} onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(255,255,255,0.45)"}>
+              Tôi còn thắc mắc ↗
+            </a>
+          </div>
+          <div style={{ marginTop:32, fontSize:12.5, color:"rgba(255,255,255,0.55)", letterSpacing:"0.02em" }}>
+            🛡️ Hoàn tiền 14 ngày · ⚡ Tải về dùng ngay · 🔁 Cập nhật trọn đời
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── FOOTER ───────────────────────────────────────────────────────────────────
+
+function LandingFooter() {
+  const ink = "#0E1226", accent = "#2A5BFF", muted = "rgba(255,255,255,0.5)", mutedStrong = "rgba(255,255,255,0.75)";
+  const cols = [
+    { title:"Sản phẩm", links:["Tài chính","Sức khỏe","Mối quan hệ","Combo","Bảng giá"] },
+    { title:"Tài nguyên", links:["Hướng dẫn","Blog","Khách hàng","Affiliate"] },
+    { title:"Công ty", links:["Về Bestlist","Liên hệ","Điều khoản","Bảo mật"] },
+  ];
+  return (
+    <footer style={{ background:ink, color:"#fff", padding:"64px 28px 28px" }}>
+      <div style={{ maxWidth:1280, margin:"0 auto", display:"grid", gridTemplateColumns:"1.6fr 1fr 1fr 1fr", gap:40, paddingBottom:48, borderBottom:"1px solid rgba(255,255,255,0.08)" }}>
+        <div>
+          <div style={{ display:"flex", alignItems:"center", gap:10, fontWeight:700, letterSpacing:"-0.02em", fontSize:18, marginBottom:16 }}>
+            <div style={{ width:32, height:32, background:accent, borderRadius:9, display:"flex", alignItems:"center", justifyContent:"center" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2" fill="#fff"/><path d="M8 8 H 16 M 8 11 H 16 M 8 14 H 16 M 8 17 H 13" stroke={accent} strokeWidth="1.8" strokeLinecap="round"/></svg>
+            </div>
+            store.bestlist.ai
+          </div>
+          <p style={{ fontSize:13.5, color:mutedStrong, lineHeight:1.6, maxWidth:320, margin:0 }}>Hệ thống template được thiết kế cho người muốn tối ưu cuộc sống — không cần lập trình, không cần thử nghiệm.</p>
+          <div style={{ display:"flex", gap:10, marginTop:22 }}>
+            {["TG","FB","YT"].map((x,i) => (
+              <a key={i} href="#" style={{ width:36, height:36, borderRadius:9, background:"rgba(255,255,255,0.06)", display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontSize:11, fontWeight:700, textDecoration:"none", border:"1px solid rgba(255,255,255,0.08)", transition:"background .15s" }}
+                onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.12)"} onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,0.06)"}>{x}</a>
+            ))}
+          </div>
+        </div>
+        {cols.map(c => (
+          <div key={c.title}>
+            <div style={{ fontSize:11.5, fontWeight:700, color:"rgba(255,255,255,0.45)", letterSpacing:"0.12em", textTransform:"uppercase", marginBottom:16 }}>{c.title}</div>
+            <ul style={{ listStyle:"none", margin:0, padding:0, display:"flex", flexDirection:"column", gap:10 }}>
+              {c.links.map(l => (
+                <li key={l}><a href="#" style={{ color:mutedStrong, fontSize:13.5, textDecoration:"none", transition:"color .15s" }} onMouseEnter={e=>e.currentTarget.style.color="#fff"} onMouseLeave={e=>e.currentTarget.style.color=mutedStrong}>{l}</a></li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <div style={{ maxWidth:1280, margin:"0 auto", padding:"24px 0 0", display:"flex", justifyContent:"space-between", alignItems:"center", fontSize:12.5, color:muted }}>
+        <span>© 2025 store.bestlist.ai · All rights reserved.</span>
+        <span>Made with ✦ in Vietnam</span>
+      </div>
+    </footer>
+  );
+}
+
+// ─── APP ──────────────────────────────────────────────────────────────────────
+
+function App() {
+  return (
+    <div>
+      <StickyBuyBar />
+      <LandingHeader />
+      <ProductHero />
+      <ProductHooks />
+      <ProductCTAInterrupt />
+      <ProductInside />
+      <ProductDemoGallery />
+      <ProductTestimonials />
+      <ProductComparison />
+      <ProductPricing />
+      <ProductFAQ />
+      <ProductFinalCTA />
+      <LandingFooter />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
     </script>
   </body>
 </html>

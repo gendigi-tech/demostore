@@ -1247,46 +1247,24 @@ function catEmoji(cat) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// EXPOSE TO WINDOW (required for HTML onclick= handlers)
-// ═══════════════════════════════════════════════════════════════
-
-Object.assign(window, {
-  // auth
-  doLogin, doLogout,
-  // navigation & render
-  navigate, render,
-  // products
-  openAddModal, openEditModal, saveProduct, calcDiscount,
-  toggleActive, confirmDelete, deleteProduct,
-  // settings
-  switchSettingsTab, saveSettingsForm,
-  // export/import
-  exportJSON, importJSON, copyEmbedCode, resetToDefaults,
-  // ui
-  toggleTheme, handleBackdropClick, closeModal,
-});
-
-// ═══════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════
 
-(function init() {
-  // Restore theme
-  const savedTheme = localStorage.getItem('cms_theme') || 'light';
-  document.documentElement.setAttribute('data-theme', savedTheme);
-  if (savedTheme === 'dark') {
-    document.getElementById('theme-label').textContent = 'Light Mode';
-    document.getElementById('theme-icon').innerHTML = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
-  }
+// Restore theme
+const savedTheme = localStorage.getItem('cms_theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+if (savedTheme === 'dark') {
+  document.getElementById('theme-label').textContent = 'Light Mode';
+  document.getElementById('theme-icon').innerHTML = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+}
 
-  if (checkAuth()) {
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('app').style.display = 'flex';
-    if (!localStorage.getItem(LS_PRODUCTS)) saveProducts(SEED_PRODUCTS);
-    if (!localStorage.getItem(LS_SETTINGS)) saveSettings(DEFAULT_SETTINGS);
-    render();
-  }
-})();
+if (checkAuth()) {
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('app').style.display = 'flex';
+  if (!localStorage.getItem(LS_PRODUCTS)) saveProducts(SEED_PRODUCTS);
+  if (!localStorage.getItem(LS_SETTINGS)) saveSettings(DEFAULT_SETTINGS);
+  render();
+}
 </script>
 </body>
 </html>

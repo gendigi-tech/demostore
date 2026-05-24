@@ -1,0 +1,47 @@
+
+CONTENT TRANG CHỦ
+PHẦN 1: COPYWRITING TRANG CHỦ (HOMEPAGE)
+1. Hero Section (Vùng đầu trang - Điểm chạm đầu tiên)
+Headline: NGỪNG THỬ NGHIỆM. BẮT ĐẦU TỐI ƯU.
+Sub-headline: Hệ thống Template &amp; Framework thiết kế sẵn giúp bạn kiểm soát 3 trụ cột lớn nhất của cuộc sống: Tài chính, Sức khỏe và Mối quan hệ. Tiết kiệm 90% thời gian thiết lập, tập trung 100% vào kết quả.
+Call to Action (CTA) Button: Khám Phá Kho Template →
+Social Proof (Dưới CTA): Được tin dùng bởi +1,200 cá nhân và nhà quản lý hiệu suất cao.
+2. The Problem &amp; Agitation (Đánh trúng nỗi đau tối lập)
+Heading: Bạn đang quản lý cuộc sống, hay đang bị sự hỗn loạn dẫn dắt?
+Body Copy:
+Mỗi ngày trôi qua, bạn mất hàng giờ chỉ để tạo file Excel theo dõi chi tiêu, loay hoay lên lịch tập luyện, hoặc quên mất việc duy trì kết nối với các mối quan hệ quan trọng.
+Việc tự xây dựng hệ thống quản lý từ đầu là một cái bẫy tiêu tốn thời gian. Bạn không cần thêm công cụ, bạn cần hệ thống đã chứng minh có hiệu quả.
+3. The Solution / Value Proposition (Giải pháp tối ưu)
+Heading: Chuyển từ "Cảm tính" sang "Số liệu".
+Body Copy:
+Chúng tôi không bán file mẫu. Chúng tôi bán phím tắt để bạn đạt đến trạng thái tối ưu nhanh nhất. Toàn bộ Template tại store.bestlist.ai được thiết kế theo tư duy tinh gọn: Dễ vận hành - Rõ chỉ số - Ra kết quả ngay.
+4. Trụ Cột Sản Phẩm (3 Core Pillars Showcase)
+(Phần này thiết kế dạng 3 cột/cards lớn, mỗi card là một ngách, click vào sẽ dẫn thẳng về trang bộ sưu tập)
+[Card 1: TÀI CHÍNH]
+Hook/Title: Làm chủ dòng tiền. Ngừng mơ hồ.
+Short Bullet:
+Tracking chi tiêu tự động, dự báo dòng tiền tương lai.
+Framework hoạch định mục tiêu tự do tài chính.
+CTA: Xem các bản mẫu Tài chính →
+[Card 2: SỨC KHỎE]
+Hook/Title: Số hóa thể trạng. Tăng trưởng năng lượng.
+Short Bullet:
+Bảng thiết lập Plan dinh dưỡng và lịch tập luyện tinh gọn.
+Hệ thống tracking chỉ số sinh học và hiệu suất giấc ngủ.
+CTA: Xem các bản mẫu Sức khỏe →
+[Card 3: MỐI QUAN HỆ]
+Hook/Title: Định hình kết nối. Giữ vững vòng ảnh hưởng.
+Short Bullet:
+CRM cá nhân quản lý danh sách liên lạc chất lượng cao (Khách hàng, Đối tác, Mentor).
+Hệ thống nhắc nhở và tối ưu hóa thời gian cho gia đình/đội ngũ.
+CTA: Xem các bản mẫu Mối quan hệ →
+5. Why Choose Us (Sự khác biệt)
+Heading: Tại sao chọn Hệ thống của Bestlist?
+Grid Content:
+Thực chiến: Không rườm rà. Chỉ giữ lại những chỉ số cốt lõi giúp bạn ra quyết định.
+Mở rộng tức thì: Tương thích hoàn hảo với các nền tảng tối ưu hiệu suất phổ biến nhất hiện nay.
+Sử dụng trọn đời: Mua một lần, nâng cấp tư duy quản trị mãi mãi.
+6. Final CTA Section (Chốt hạ hành động)
+Heading: Ngừng lãng phí hiệu suất của bạn.
+Sub-heading: Chọn một hệ thống thích hợp và bắt đầu kiểm soát cuộc sống của bạn ngay hôm nay.
+CTA Button: Truy cập kho sản phẩm (Miễn phí &amp; Trả phí)

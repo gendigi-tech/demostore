@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>store.bestlist.ai — Ngừng thử nghiệm. Bắt đầu tối ưu.</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Caveat:wght@500;600;700&family=Patrick+Hand&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      html {
+        scroll-behavior: smooth;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #fafaf7;
+        font-family: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        color: #0e1226;
+        -webkit-font-smoothing: antialiased;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      ::selection {
+        background: #2a5bff;
+        color: #fff;
+      }
+    </style>
+
+    <script
+      src="https://unpkg.com/react@18.3.1/umd/react.development.js"
+      integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"
+      integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"
+      integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel" src="hero-shared.jsx"></script>
+    <script type="text/babel" src="landing-hero.jsx"></script>
+    <script type="text/babel" src="landing-solution.jsx"></script>
+    <script type="text/babel" src="landing-pillars.jsx"></script>
+    <script type="text/babel" src="landing-misc.jsx"></script>
+
+    <script type="text/babel" data-presets="react">
+      function App() {
+        return (
+          <div>
+            <LandingHeader />
+            <LandingHero />
+            <LandingProblem />
+            <LandingSolution />
+            <LandingPillars />
+            <LandingWhy />
+            <LandingFinalCTA />
+            <LandingFooter />
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+    <template id="__bundler_thumbnail" data-bg-color="#fafaf7">
+      <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#C9D6F2" />
+            <stop offset="50%" stop-color="#A8C2FF" />
+            <stop offset="100%" stop-color="#2A5BFF" />
+          </linearGradient>
+        </defs>
+        <rect x="60" y="80" width="1080" height="640" rx="40" fill="url(#bg)" />
+        <rect x="360" y="220" width="480" height="380" rx="24" fill="#ffffff" opacity="0.95" />
+        <rect x="410" y="270" width="160" height="22" rx="5" fill="#2A5BFF" />
+        <rect x="410" y="310" width="380" height="28" rx="6" fill="#0E1226" />
+        <rect x="410" y="352" width="320" height="28" rx="6" fill="#0E1226" opacity="0.55" />
+        <rect x="410" y="410" width="380" height="12" rx="4" fill="#0E1226" opacity="0.2" />
+        <rect x="410" y="432" width="260" height="12" rx="4" fill="#0E1226" opacity="0.2" />
+        <rect x="410" y="500" width="180" height="46" rx="23" fill="#2A5BFF" />
+        <!-- floating sticky -->
+        <g transform="translate(160 220) rotate(-7)">
+          <rect width="140" height="140" fill="#FFF188" />
+          <circle cx="70" cy="-4" r="6" fill="#E23B3B" />
+        </g>
+        <!-- floating sphere -->
+        <circle cx="980" cy="560" r="56" fill="#1B43D9" />
+        <circle cx="965" cy="545" r="18" fill="#fff" opacity="0.5" />
+      </svg>
+    </template>
+  </body>
+</html>

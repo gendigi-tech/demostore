@@ -1,0 +1,22 @@
+1. HERO SECTION: LỜI HỨA KẾT QUẢ
+Headline: NGỪNG QUẢN LÝ BẰNG CẢM GIÁC. BẮT ĐẦU ĐO LƯỜNG BẰNG SỐ LIỆU.
+Sub-headline: Hệ thống Template [Tên sản phẩm] tinh gọn giúp bạn kiểm soát 100% [Tài chính / Sức khỏe / Mối quan hệ] của mình chỉ với 10 phút mỗi tuần.
+CTA Button: SỞ HỮU HỆ THỐNG NGAY $\rightarrow$
+Micro-copy: Tải về dùng ngay. Mua 1 lần, sở hữu trọn đời.
+2. THE HOOKS: 3 CÚ ĐẤM TÂM LÝ (Thay thế Storytelling)
+HOOK 1: SỰ THẬT PHŨ PHÀNG
+&quot;Bạn bận rộn 12 tiếng mỗi ngày nhưng cuối tháng vẫn mơ hồ về kết quả? Sự thật là: Bạn không thiếu năng lực, bạn chỉ đang thiếu một hệ thống đo lường. Nếu không thể số hóa, bạn không thể tối ưu.&quot;
+HOOK 2: CÁI BẪY CÔNG CỤ
+&quot;Đừng lãng phí hàng tuần trời để tự mò mẫm xây dựng file Excel phức tạp hay tải những ứng dụng rườm rà rồi bỏ xó sau 3 ngày. Hãy mua lại thời gian. Hệ thống này là phím tắt đã được chứng minh hiệu quả.&quot;
+HOOK 3: CHI PHÍ CỦA SỰ TRÌ HOÃN
+&quot;Mỗi ngày bạn sống trong sự hỗn loạn và không có số liệu rõ ràng là một ngày bạn đang tự đánh mất đi [tiền bạc / năng lượng / các mối quan hệ chất lượng]. Sự rõ ràng chính là sức mạnh.&quot;
+CTA INTERRUPT (Nút bấm ngắt giữa trang): Ngừng lãng phí hiệu suất của bạn $\rightarrow$ [MUA NGAY]
+3. WHAT’S INSIDE: BÓC TÁCH GIÁ TRỊ (3 Dòng kết quả)
+Heading: Bạn nhận được gì bên trong hệ thống Plug-and-Play này?
+01 | Framework định hướng: Nhập mục tiêu $\rightarrow$ Tự động bóc tách lộ trình hành động.
+02 | Dashboard Tracking 1-Page: Nhìn 3 giây $\rightarrow$ Nắm trọn toàn bộ chỉ số cốt lõi.
+03 | Hướng dẫn tinh gọn: Xem 5 phút $\rightarrow$ Vận hành được ngay, không cần giỏi kỹ thuật.
+4. THE PRICING &amp; FINAL CTA: CHỐT HẠ
+Heading: Giá trị thực tế: ~~$XXX~~ | Giá của bạn hôm nay: $XX
+CTA Button: BẤT ĐẦU TỐI ƯU HÓA NGAY HÔM NAY $\rightarrow$
+

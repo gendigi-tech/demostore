@@ -401,7 +401,7 @@
     <label class="login-label" for="pw-input">Mật khẩu Admin</label>
     <input id="pw-input" type="password" class="login-input" placeholder="Nhập mật khẩu..." autocomplete="current-password" />
     <div id="login-error" class="login-error">Mật khẩu không đúng. Thử lại.</div>
-    <button class="login-btn" onclick="doLogin()">Đăng nhập →</button>
+    <button class="login-btn" id="login-btn">Đăng nhập →</button>
     <div class="login-hint">Mật khẩu mặc định: admin123</div>
   </div>
 </div>
@@ -422,32 +422,32 @@
     </div>
     <nav class="sb-nav">
       <div class="sb-section">Tổng quan</div>
-      <button class="nav-item active" id="nav-dashboard" onclick="navigate('dashboard')">
+      <button class="nav-item active" id="nav-dashboard">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         Dashboard
       </button>
       <div class="sb-section">Nội dung</div>
-      <button class="nav-item" id="nav-products" onclick="navigate('products')">
+      <button class="nav-item" id="nav-products">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
         Sản phẩm
         <span class="nav-badge" id="products-count">0</span>
       </button>
-      <button class="nav-item" id="nav-settings" onclick="navigate('settings')">
+      <button class="nav-item" id="nav-settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         Nội dung trang
       </button>
       <div class="sb-section">Công cụ</div>
-      <button class="nav-item" id="nav-export" onclick="navigate('export')">
+      <button class="nav-item" id="nav-export">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export / Import
       </button>
     </nav>
     <div class="sb-bottom">
-      <button class="nav-item" onclick="toggleTheme()">
+      <button class="nav-item" id="theme-toggle-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" id="theme-icon"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
         <span id="theme-label">Dark Mode</span>
       </button>
-      <button class="nav-item" onclick="doLogout()" style="color:#f87171;">
+      <button class="nav-item" id="logout-btn" style="color:#f87171;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Đăng xuất
       </button>
@@ -463,7 +463,7 @@
         <strong id="breadcrumb-label">Dashboard</strong>
       </div>
       <div class="header-right">
-        <button class="header-btn" title="Refresh" onclick="render()">
+        <button class="header-btn" id="refresh-btn" title="Refresh">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
         </button>
         <a href="Product.html" target="_blank">
@@ -484,7 +484,7 @@
 </div>
 
 <!-- ── Modal Backdrop ────────────────────────────────────────── -->
-<div id="modal-backdrop" onclick="handleBackdropClick(event)">
+<div id="modal-backdrop">
   <div id="modal-container"></div>
 </div>
 
@@ -1265,6 +1265,20 @@ if (checkAuth()) {
   if (!localStorage.getItem(LS_SETTINGS)) saveSettings(DEFAULT_SETTINGS);
   render();
 }
+
+// ═══════════════════════════════════════════════════════════════
+// EVENT LISTENERS (static HTML elements)
+// ═══════════════════════════════════════════════════════════════
+
+document.getElementById('login-btn').addEventListener('click', () => doLogin());
+document.getElementById('nav-dashboard').addEventListener('click', () => navigate('dashboard'));
+document.getElementById('nav-products').addEventListener('click', () => navigate('products'));
+document.getElementById('nav-settings').addEventListener('click', () => navigate('settings'));
+document.getElementById('nav-export').addEventListener('click', () => navigate('export'));
+document.getElementById('theme-toggle-btn').addEventListener('click', () => toggleTheme());
+document.getElementById('logout-btn').addEventListener('click', () => doLogout());
+document.getElementById('refresh-btn').addEventListener('click', () => render());
+document.getElementById('modal-backdrop').addEventListener('click', (e) => handleBackdropClick(e));
 </script>
 </body>
 </html>
